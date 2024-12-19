@@ -1,21 +1,23 @@
-import ProfileModel from "../models/ProfileModel.js";
 import UserModel from "../models/UserModel.js";
-import sendEmail from "../utility/emailUtility.js";
 import { encodeToken } from "../utility/tokenUtility.js";
 
-export const UserOtpService = async (req, res) => {
+export const UserRegisterService = async (req, res) => {
   try {
-    let email = req.params.email;
-    let code = Math.floor(100000 + Math.random() * 900000);
-    let EmailText = "Your OTP is " + code;
-    let EmailSubject = "OTP Verification";
-    await sendEmail(email, EmailText, EmailSubject);
-    await UserModel.updateOne(
-      { email: email },
-      { $set: { otp: code } },
-      { upsert: true }
-    );
-    return { status: "success", message: "OTP has been sent successfully" };
+    let reqBody = req.body;
+
+    let existingUser = await UserModel.findOne({ email: reqBody.email });
+    if (!existingUser) {
+      await UserModel.create(reqBody);
+      return {
+        status: "success",
+        message: "User has been registered successfully",
+      };
+    } else {
+      return {
+        status: "failed",
+        message: "User already exists",
+      };
+    }
   } catch (error) {
     return {
       status: "failed",
@@ -24,23 +26,16 @@ export const UserOtpService = async (req, res) => {
   }
 };
 
-export const VerifyOtpService = async (req, res) => {
+export const UserLoginService = async (req, res) => {
   try {
     let email = req.params.email;
-    let otp = req.params.otp;
+    let pass = req.params.pass;
     let data = await UserModel.findOne({ email: email });
-    if (data.otp === otp) {
+    if (data.password === pass) {
       let user_id = data._id.toString();
 
       //generate token
       let token = encodeToken(email, user_id);
-
-      //OTP update to 0
-      await UserModel.updateOne(
-        { email: email },
-        { $set: { otp: 0 } },
-        { upsert: true }
-      );
 
       //set token in response cookie
       let cookieOptions = {
@@ -48,9 +43,13 @@ export const VerifyOtpService = async (req, res) => {
       };
       res.cookie("token", token, cookieOptions);
 
-      return { status: "success", message: "OTP is verified", token: token };
+      return {
+        status: "success",
+        message: "login is successful",
+        token: token,
+      };
     } else {
-      return { status: "failed", message: "Invalid OTP" };
+      return { status: "failed", message: "Invalid email or Password" };
     }
   } catch (error) {
     return {
@@ -77,19 +76,18 @@ export const LogoutService = async (req, res) => {
   }
 };
 
-export const SaveProfileService = async (req, res) => {
+export const UpdateProfileService = async (req, res) => {
   try {
     let reqBody = req.body;
-    let user_id = req.headers.user_id;
-    reqBody["userID"] = user_id;
-    await ProfileModel.updateOne(
-      { userID: user_id },
+    let email = req.headers.email;
+    await UserModel.updateOne(
+      { email: email },
       { $set: reqBody },
       { upsert: true }
     );
     return {
       status: "success",
-      message: "Profile has been saved successfully",
+      message: "Profile has been updated successfully",
     };
   } catch (error) {
     return {
@@ -101,8 +99,8 @@ export const SaveProfileService = async (req, res) => {
 
 export const ReadProfileService = async (req, res) => {
   try {
-    let user_id = req.headers.user_id;
-    let data = await ProfileModel.findOne({ userID: user_id });
+    let email = req.headers.email;
+    let data = await UserModel.findOne({ email: email });
     return { status: "success", data: data };
   } catch (error) {
     return {
@@ -114,7 +112,7 @@ export const ReadProfileService = async (req, res) => {
 
 export const AllUsersReadProfilesService = async (req, res) => {
   try {
-    let data = await ProfileModel.find();
+    let data = await UserModel.find();
     return { status: "success", data: data };
   } catch (error) {
     return {
@@ -124,10 +122,15 @@ export const AllUsersReadProfilesService = async (req, res) => {
   }
 };
 
-export const DeleteProfileService = async (req, res) => {
+export const DeleteUserService = async (req, res) => {
   try {
-    let user_id = req.headers.user_id;
-    await ProfileModel.deleteOne({ userID: user_id });
+    let email = req.headers.email;
+    await UserModel.deleteOne({ email: email });
+    let cookieOptions = {
+      expires: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    };
+    res.cookie("token", "", cookieOptions);
+
     return { status: "success", message: "Profile has been deleted" };
   } catch (error) {
     return {

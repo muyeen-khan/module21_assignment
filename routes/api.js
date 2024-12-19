@@ -1,27 +1,26 @@
 import express from "express";
 import {
   AllUsersReadProfiles,
-  CreateProfile,
-  DeleteProfile,
+  DeleteUser,
   ReadProfile,
   UpdateProfile,
+  UserLogin,
   UserLogout,
-  UserRegisterOtp,
-  VerifyLogin,
+  UserRegister,
 } from "../app/controllers/UserController.js";
 import authMiddleware from "../app/middlwares/authMiddleware.js";
 const router = express.Router();
 
 //User Routes
-router.get("/UserRegisterOtp/:email", UserRegisterOtp);
-router.get("/verifyLogin/:email/:otp", VerifyLogin);
+router.post("/UserRegister", UserRegister);
+router.get("/UserLogin/:email/:pass", UserLogin);
+
+router.post("/UpdateProfile", authMiddleware, UpdateProfile);
 router.get("/UserLogout", authMiddleware, UserLogout);
 
-router.post("/CreateProfile", authMiddleware, CreateProfile);
-router.post("/UpdateProfile", authMiddleware, UpdateProfile);
 router.get("/ReadProfile", authMiddleware, ReadProfile);
 router.get("/AllUsersReadProfiles", authMiddleware, AllUsersReadProfiles);
 
-router.delete("/DeleteProfile", authMiddleware, DeleteProfile);
+router.delete("/DeleteUser", authMiddleware, DeleteUser);
 
 export default router;

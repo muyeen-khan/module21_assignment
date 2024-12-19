@@ -1,20 +1,20 @@
 import {
   AllUsersReadProfilesService,
-  DeleteProfileService,
+  DeleteUserService,
   LogoutService,
   ReadProfileService,
-  SaveProfileService,
-  UserOtpService,
-  VerifyOtpService,
+  UpdateProfileService,
+  UserLoginService,
+  UserRegisterService,
 } from "../services/UserServices.js";
 
-export const UserRegisterOtp = async (req, res) => {
-  let result = await UserOtpService(req);
+export const UserRegister = async (req, res) => {
+  let result = await UserRegisterService(req);
   return res.status(200).json(result);
 };
 
-export const VerifyLogin = async (req, res) => {
-  let result = await VerifyOtpService(req, res);
+export const UserLogin = async (req, res) => {
+  let result = await UserLoginService(req, res);
   return res.status(200).json(result);
 };
 
@@ -23,13 +23,8 @@ export const UserLogout = async (req, res) => {
   return res.status(200).json(result);
 };
 
-export const CreateProfile = async (req, res) => {
-  let result = await SaveProfileService(req);
-  return res.status(200).json(result);
-};
-
 export const UpdateProfile = async (req, res) => {
-  let result = await SaveProfileService(req);
+  let result = await UpdateProfileService(req);
   return res.status(200).json(result);
 };
 
@@ -43,7 +38,7 @@ export const AllUsersReadProfiles = async (req, res) => {
   return res.status(200).json(result);
 };
 
-export const DeleteProfile = async (req, res) => {
-  let result = await DeleteProfileService(req);
+export const DeleteUser = async (req, res) => {
+  let result = await DeleteUserService(req, res);
   return res.status(200).json(result);
 };
