@@ -1,0 +1,19 @@
+In this assignment, you have to create a user data registration project using express.js (only backend)
+
+Requirements:
+
+1.User Registration api ✔
+2.User login api ✔
+3.User auth by JWT token + cookie
+
+6.Single User profile update api
+4.User single profile read api
+
+5.All User profile read api
+7.Delete Single user api
+
+Items that are mandatory to keep in the Mongoose schema: firstName, lastName, NIDNumber, phoneNumber, password, bloodGroup
+
+Submit Instruction:
+
+You upload the project to GitHub and submit the GitHub repository link. If you submit without git link you will get 0 mark.
